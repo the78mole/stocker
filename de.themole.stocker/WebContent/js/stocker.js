@@ -5,17 +5,7 @@ var stocker = {
 			var previousTab = e.relatedTarget // previous tab
 			Cookies.set('de.themole.stocker.items.tab.selected', activatedTab.hash);
 			if (activatedTab.hash == "#listItems") {
-				$.get({
-					url : "./items",
-					success : function(data) {
-						var mydata = data;
-						var tbody = $("#itemListTable tbody");
-						tbody.empty();
-						$.each(data, function(index, element) {
-							insertListItemRow(tbody, element);
-						});
-					}
-				});
+				updateItemsList();
 			}
 		});
 		$(".navbar-nav a").on('click', function(e) {
@@ -48,25 +38,71 @@ var stocker = {
 	}
 };
 
+function updateItemsList() {
+	$.get({
+		url : "./items",
+		success : function(data) {
+			var mydata = data;
+			var tbody = $("#itemListTable tbody");
+			tbody.empty();
+			$.each(data, function(index, element) {
+				insertListItemRow(tbody, element);
+			});
+			$('a[name="itemsDelete"]').click(itemsDeleteClick);
+			$('a[name="itemsEdit"]').click(itemsEditClick);
+			$('a[name="itemsIn"]').click(itemsInClick);
+			$('a[name="itemsOut"]').click(itemsOutClick);
+		}
+	});	
+}
+
+function itemsDeleteClick(event) {
+	var tid = $(event.currentTarget).attr('id');
+	var itemid = tid.replace(/^.*_(.*)$/, '$1');
+	$.ajax({
+		url      : "./item/" + itemid,
+		method   : "delete",
+		dataType : "json",
+		success  : function(data) {
+			$("#itemsListRow_" + itemid).remove();
+		},
+		error		 : function (data, error, expn) {
+			alert(error + " happened deleting: " + expn);
+		}		
+	});
+}
+
+function itemsEditClick(event) {
+	var tid = $(event.currentTarget).attr('id');
+}
+
+function itemsInClick(event) {
+	var tid = $(event.currentTarget).attr('id');
+}
+
+function itemsOutClick(event) {
+	var tid = $(event.currentTarget).attr('id');
+}
+
 function insertListItemRow(table, data) {	
 	var tabrow = '';
-	tabrow += '<tr>\n';
+	tabrow += '<tr id="itemsListRow_' + data.id + '">\n';
 	tabrow += '	<td>' + data.id + '</td>\n';
-	tabrow += '	<td>' + <NYI> + '</td>\n';
+	tabrow += '	<td>' + "<NYI>" + '</td>\n';
 	tabrow += '	<td>' + data.name + '</td>\n';
 	tabrow += '	<td>' + data.created + '</td>\n';
 	tabrow += '	<td>' + data.description + '</td>\n';
 	tabrow += '	<td>\n';
-	tabrow += '	  <a href="#" id="actionItem_0_delete" role="button" class="btn btn-danger">\n';
+	tabrow += '	  <a name="itemsDelete" href="#" id="actionItemDelete_' + data.id + '" role="button" class="btn btn-danger">\n';
 	tabrow += '	    <span class="glyphicon glyphicon-trash"></span>\n';
 	tabrow += '	  </a>\n';
-	tabrow += '	  <a href="#" id="actionItem_0_edit" role="button" class="btn btn-primary">\n';
+	tabrow += '	  <a name="itemsEdit" href="#" id="actionItemEdit_' + data.id + '" role="button" class="btn btn-primary">\n';
 	tabrow += '	    <span class="glyphicon glyphicon-edit"></span>\n';
 	tabrow += '	  </a>\n';
-	tabrow += '	  <a href="#" id="actionItem_0_in" role="button" class="btn btn-success">\n';
+	tabrow += '	  <a name="itemsIn" href="#" id="actionItemIn_' + data.id + '" role="button" class="btn btn-success">\n';
 	tabrow += '	    <span class="glyphicon glyphicon-plus"></span>\n';
 	tabrow += '	  </a>\n';
-	tabrow += '	  <a href="#" id="actionItem_0_out" role="button" class="btn btn-warning">\n';
+	tabrow += '	  <a name="itemsOut" href="#" id="actionItemOut_' + data.id + '" role="button" class="btn btn-warning">\n';
 	tabrow += '	    <span class="glyphicon glyphicon-minus"></span>\n';
 	tabrow += '	  </a>\n';
 	tabrow += '	</td>\n';
@@ -83,11 +119,11 @@ function submitAddItemForm() {
 		data     : formdata,
 		dataType : "json",
 		success  : function(data) {
-			alert("success adding");
+			// alert("success adding");
 		},
-		error		 : function (data) {
-			alert("error happened adding");
-		}
+		error		 : function (data, error, expn) {
+			alert(error + " happened adding: " + expn);
+		}		
 	});
 }
 

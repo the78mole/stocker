@@ -22,7 +22,7 @@ import de.themole.stocker.dao.Item;
 /**
  * Servlet implementation class ItemService
  */
-@WebServlet(urlPatterns = { "/item"})
+@WebServlet(urlPatterns = { "/item", "/item/*" })
 public class ItemService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
@@ -78,6 +78,10 @@ public class ItemService extends HttpServlet {
 		
 		Item i = gson.fromJson(sb.toString(), Item.class);
 		
+		if (i.getName().length() > 255) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Name was too long. 255 Characters are allowed.");
+		}
+
 		if (i.getId() != null) {
 			response.sendError(HttpServletResponse.SC_CONFLICT, 
 					"A new item can not contain an ID (Primary Key).");
@@ -90,13 +94,32 @@ public class ItemService extends HttpServlet {
 			response.setContentType("application/json");
 			response.getWriter().append(gson.toJson(i));
 		}
+		em.close();
 	}
 
 	/**
 	 * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		EntityManager em = StockerConfiguration.getEntitiyManager();
+		String pi = request.getPathInfo();
+		String[] saId = pi.split("/");
+		Long itemId = Long.parseLong(saId[saId.length-1]);
+		EntityTransaction ta = em.getTransaction();
+		ta.begin();
+		Item i = em.find(Item.class, itemId);
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(Item.class, new ItemTypeAdapter())
+				.create();
+
+		// Return back the just deleted element to frontend
+		response.setContentType("application/json");
+		response.getWriter().append(gson.toJson(i));
+
+		em.remove(i);
+		ta.commit();
+		em.close();
+		
 	}
 
 	/**
