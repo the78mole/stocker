@@ -8,6 +8,9 @@ import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import lombok.Data;
+
+@Data
 @Embeddable
 public class Update implements Serializable {
 

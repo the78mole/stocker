@@ -19,6 +19,12 @@ public class StorageUnitRef implements Serializable{
 
 	@VariableOneToOne
 	ILocation location;
+
+	/**
+	 * If the specified location is a bulk storage location, the item count not accurate.
+	 */
+	@Basic
+	Boolean isBulk;
 	
 	@Embedded
 	StorageUnit storage;

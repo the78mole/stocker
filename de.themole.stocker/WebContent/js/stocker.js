@@ -84,13 +84,37 @@ function itemsOutClick(event) {
 	var tid = $(event.currentTarget).attr('id');
 }
 
-function insertListItemRow(table, data) {	
+function date2YMD(cdate) {
+	var cyear = cdate.getFullYear();
+	var cmonth = cdate.getMonth() + 1; 
+	var cday = cdate.getDate() + 1;
+	var strcdate = cyear + "-" + ( cmonth < 10 ? "0" : "" ) + cmonth + "-" + ( cday < 10 ? "0" : "" ) + cday;
+	return strcdate;
+}
+
+function insertListItemRow(table, data) {
+	var updates = data.updates;
+	var lastUpdate;
+	var cdate, cdesc;
+	if (updates !== undefined && updates.length > 0) {
+		lastUpdate = updates[updates.length - 1];
+		if (lastUpdate.timestamp !== undefined) {
+			cdate = new Date(lastUpdate.timestamp);
+			cdesc = lastUpdate.log;
+		}
+	}
+	if (cdate === undefined) {
+		cdate = new Date(data.created);
+	}
+	var strdate = date2YMD(cdate);
 	var tabrow = '';
 	tabrow += '<tr id="itemsListRow_' + data.id + '">\n';
 	tabrow += '	<td>' + data.id + '</td>\n';
-	tabrow += '	<td>' + "<NYI>" + '</td>\n';
+	tabrow += '	<td>' + "NIY" + '</td>\n';
 	tabrow += '	<td>' + data.name + '</td>\n';
-	tabrow += '	<td>' + data.created + '</td>\n';
+	tabrow += '	<td data-toggle="tooltip" ';
+		tabrow += 'title="' + cdate + (cdesc !== undefined ?  ":" + cdesc : "") + '">';
+		tabrow += strdate + '</td>\n';
 	tabrow += '	<td>' + data.description + '</td>\n';
 	tabrow += '	<td>\n';
 	tabrow += '	  <a name="itemsDelete" href="#" id="actionItemDelete_' + data.id + '" role="button" class="btn btn-danger">\n';
